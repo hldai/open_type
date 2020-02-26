@@ -13,7 +13,8 @@ def load_vocab_dict(vocab_file_name, vocab_max_size=None, start_vocab_count=None
 
 FILE_ROOT = '/home/data/hldai/ultrafine/uf_data/'
 GLOVE_VEC = '/home/data/hldai/res/wordvecs/glove.840B.300d.txt'
-EXP_ROOT = '/home/data/hldai/ultrafine/exp'
+# EXP_ROOT = '/home/data/hldai/ultrafine/exp'
+EXP_ROOT = '/data/hldai/ultrafine/exp'
 
 ANSWER_NUM_DICT = {"open": 10331, "onto":89, "wiki": 4600, "kb":130, "gen":9}
 
