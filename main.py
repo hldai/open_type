@@ -62,8 +62,9 @@ def get_joint_datasets(args):
   if args.mode == 'train':
     if not args.remove_open and not args.only_crowd:
       train_gen_list.append(
-        #`("open", get_data_gen('train/open*.json', 'train', args, vocab, "open")))
-        ("open", get_data_gen('distant_supervision/headwords.json', 'train', args, vocab, "open")))
+        ("open", get_data_gen('train/open*.json', 'train', args, vocab, "open")))
+        # ("open", get_data_gen('distant_supervision/headwords.json', 'train', args, vocab, "open")))
+        # ("open", get_data_gen('distant_supervision/headword_train.json', 'train', args, vocab, "open")))
       valid_gen_list.append(("open", get_data_gen('distant_supervision/headword_dev.json', 'dev', args, vocab, "open")))
     if not args.remove_el and not args.only_crowd:
       valid_gen_list.append(
@@ -71,8 +72,8 @@ def get_joint_datasets(args):
          get_data_gen('distant_supervision/el_dev.json', 'dev', args, vocab, "wiki" if args.multitask else "open")))
       train_gen_list.append(
         ("wiki",
-         get_data_gen('distant_supervision/el_train.json', 'train', args, vocab, "wiki" if args.multitask else "open")))
-         #get_data_gen('train/el_train.json', 'train', args, vocab, "wiki" if args.multitask else "open")))
+         # get_data_gen('distant_supervision/el_train.json', 'train', args, vocab, "wiki" if args.multitask else "open")))
+         get_data_gen('train/el_train.json', 'train', args, vocab, "wiki" if args.multitask else "open")))
     if args.add_crowd or args.only_crowd:
       train_gen_list.append(
         ("open", get_data_gen('crowd/train_m.json', 'train', args, vocab, "open")))
@@ -130,12 +131,14 @@ def _train(args):
       optimizer.zero_grad()
       loss, output_logits = model(batch, type_name)
       loss.backward()
-      total_loss += loss.data.cpu()[0]
+      # total_loss += loss.data.cpu()[0]
+      total_loss += loss.data.cpu().numpy()
       optimizer.step()
 
       if batch_num % args.log_period == 0 and batch_num > 0:
         gc.collect()
-        cur_loss = float(1.0 * loss.data.cpu().clone()[0])
+        # cur_loss = float(1.0 * loss.data.cpu().clone()[0])
+        cur_loss = float(1.0 * loss.data.cpu().numpy())
         elapsed = time.time() - start_time
         train_loss_str = ('|loss {0:3f} | at {1:d}step | @ {2:.2f} ms/batch'.format(cur_loss, batch_num,
                                                                                     elapsed * 1000 / args.log_period))
@@ -178,7 +181,8 @@ def evaluate_batch(batch_num, eval_batch, model, tensorboard, val_type_name, goa
   model.eval()
   loss, output_logits = model(eval_batch, val_type_name)
   output_index = get_output_index(output_logits)
-  eval_loss = loss.data.cpu().clone()[0]
+  # eval_loss = loss.data.cpu().clone()[0]
+  eval_loss = loss.data.cpu().numpy()
   eval_loss_str = 'Eval loss: {0:.7f} at step {1:d}'.format(eval_loss, batch_num)
   gold_pred = get_gold_pred_str(output_index, eval_batch['y'].data.cpu().clone(), goal)
   eval_accu = sum([set(y) == set(yp) for y, yp in gold_pred]) * 1.0 / len(gold_pred)
